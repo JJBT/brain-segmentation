@@ -25,7 +25,6 @@ def train_epoch(
 ) -> float or torch.Tensor:
     model.train()
     epoch_loss = 0.
-    batch_size = loader.batch_size
 
     for idx, batch_data in enumerate(loader):
         data, target = batch_data["image"].to(device), batch_data["label"].to(device)
@@ -38,7 +37,7 @@ def train_epoch(
         optimizer.step()
 
         loss_value = loss.item()
-        epoch_loss += loss_value / batch_size
+        epoch_loss += loss_value / len(loader)
         print(
             "Epoch {} {}/{}".format(epoch, idx, len(loader)),
             "loss: {:.4f}".format(loss_value),
@@ -64,6 +63,7 @@ def val_epoch(
 
     model.eval()
     with torch.no_grad():
+        avg_acc = 0.
         for idx, batch_data in enumerate(loader):
             data, target = batch_data["image"].to(device), batch_data["label"].to(device)
             logits = model_inferer(data)
@@ -82,12 +82,13 @@ def val_epoch(
             acc = acc_func(y_pred=val_output_convert, y=val_labels_convert)
 
             acc_list = acc.detach().cpu().numpy()
-            avg_acc = np.mean([np.nanmean(l) for l in acc_list])
+            val_acc = np.mean([np.nanmean(l) for l in acc_list])
+            avg_acc += val_acc / len(loader)
 
             print(
                 "Val {} {}/{}".format(epoch, idx, len(loader)),
                 "acc",
-                avg_acc,
+                val_acc,
             )
     return avg_acc
 

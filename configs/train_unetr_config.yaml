@@ -1,11 +1,11 @@
-run_name: unetr_first_run
-batch_size: 20
-optim_lr: 1e-6
+run_name: unetr_roi_32
+batch_size: 40
+optim_lr: 1e-5
 
 log_dir: 'logs'
 val_every: 5
 save_every: 20
-inf_size: [16, 16, 16]
+inf_size: [32, 32, 32]
 in_channels: 1
 out_channels: 14
 feature_size: 16
@@ -26,7 +26,7 @@ optim_name: adamw
 optim_weight_decay: 1e-5
 momentum: 0.99
 lrschedule_name: warmup_cosine
-warmup_epochs: 50
+warmup_epochs: 10
 max_epochs: 100000
 data_dir: /home/vladimir/dev/data/msd/
 #data_dir: /home/vladimir/dev/data/msd_/

@@ -8,13 +8,24 @@ from torch.utils.data import Subset
 
 def get_msd_vanilla_transforms(
         roi_size: Sequence[int],
+        spacing: Sequence[float],
+        a_min: float,
+        a_max: float,
+        b_min: float,
+        b_max: float,
         modality: int = 0
 ):
-    transforms_list = [
+    train_transforms_list = [
         transforms.LoadImaged(keys=["image", "label"]),
         transforms.AsChannelFirstd(keys=["image"]),
         transforms.Lambdad(keys=["image"], func=lambda x: x[modality]),
         transforms.AddChanneld(keys=["image", "label"]),
+        transforms.Spacingd(
+            keys=["image", "label"], pixdim=spacing, mode=("bilinear", "nearest")
+        ),
+        transforms.ScaleIntensityRanged(
+            keys=["image"], a_min=a_min, a_max=a_max, b_min=b_min, b_max=b_max, clip=True
+        ),
         transforms.CropForegroundd(keys=["image", "label"], source_key="image"),
         transforms.RandCropByPosNegLabeld(
             keys=["image", "label"],
@@ -28,8 +39,24 @@ def get_msd_vanilla_transforms(
         ),
         transforms.ToTensord(keys=["image", "label"]),
     ]
-    train_transform = transforms.Compose(transforms_list)
-    val_transform = transforms.Compose(transforms_list)
+
+    val_transforms_list = [
+        transforms.LoadImaged(keys=["image", "label"]),
+        transforms.AsChannelFirstd(keys=["image"]),
+        transforms.Lambdad(keys=["image"], func=lambda x: x[modality]),
+        transforms.AddChanneld(keys=["image", "label"]),
+        transforms.Spacingd(
+            keys=["image", "label"], pixdim=spacing, mode=("bilinear", "nearest")
+        ),
+        transforms.ScaleIntensityRanged(
+            keys=["image"], a_min=a_min, a_max=a_max, b_min=b_min, b_max=b_max, clip=True
+        ),
+        transforms.CropForegroundd(keys=["image", "label"], source_key="image"),
+        transforms.ToTensord(keys=["image", "label"]),
+    ]
+
+    train_transform = transforms.Compose(train_transforms_list)
+    val_transform = transforms.Compose(val_transforms_list)
     return train_transform, val_transform
 
 
@@ -117,7 +144,14 @@ def get_loader(
 
     datalist_json = os.path.join(data_dir, json_name)
 
-    train_transform, val_transform = get_msd_vanilla_transforms(roi_size=roi_size)
+    train_transform, val_transform = get_msd_vanilla_transforms(
+        roi_size=roi_size,
+        spacing=spacing,
+        a_min=a_min,
+        a_max=a_max,
+        b_min=b_min,
+        b_max=b_max,
+    )
 
     if test_mode:
         test_files = load_decathlon_datalist(datalist_json, True, "validation", base_dir=data_dir)

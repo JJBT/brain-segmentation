@@ -206,7 +206,7 @@ def run(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=str, default="unetr_config_example.yaml")
+    parser.add_argument("--config", type=str, default="train_unetr_config.yaml")
     args = parser.parse_args()
     config_name = args.config
 
