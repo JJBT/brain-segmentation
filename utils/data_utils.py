@@ -23,9 +23,7 @@ def get_msd_vanilla_transforms(
         transforms.Spacingd(
             keys=["image", "label"], pixdim=spacing, mode=("bilinear", "nearest")
         ),
-        transforms.ScaleIntensityRanged(
-            keys=["image"], a_min=a_min, a_max=a_max, b_min=b_min, b_max=b_max, clip=True
-        ),
+        transforms.ScaleIntensityd(keys=["image"]),
         transforms.CropForegroundd(keys=["image", "label"], source_key="image"),
         transforms.RandCropByPosNegLabeld(
             keys=["image", "label"],
@@ -48,9 +46,7 @@ def get_msd_vanilla_transforms(
         transforms.Spacingd(
             keys=["image", "label"], pixdim=spacing, mode=("bilinear", "nearest")
         ),
-        transforms.ScaleIntensityRanged(
-            keys=["image"], a_min=a_min, a_max=a_max, b_min=b_min, b_max=b_max, clip=True
-        ),
+        transforms.ScaleIntensityd(keys=["image"]),
         transforms.CropForegroundd(keys=["image", "label"], source_key="image"),
         transforms.ToTensord(keys=["image", "label"]),
     ]
