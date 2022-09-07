@@ -6,13 +6,13 @@ import numpy as np
 import torch
 import torch.nn.parallel
 import torch.utils.data.distributed
-from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import DataLoader
 from torch.optim import Optimizer
 
 from monai.data import decollate_batch
 
 from utils import utils
+from logger import WandBLogger
 
 
 def train_epoch(
@@ -21,6 +21,7 @@ def train_epoch(
         optimizer: Optimizer,
         epoch: int,
         loss_func: Callable,
+        logger: Callable,
         device: str or torch.device,
 ) -> float or torch.Tensor:
     model.train()
@@ -42,6 +43,7 @@ def train_epoch(
             "Epoch {} {}/{}".format(epoch, idx, len(loader)),
             "loss: {:.4f}".format(loss_value),
             )
+        logger("train/loss", loss_value)
 
     utils.zero_grad(model)
 
@@ -53,6 +55,7 @@ def val_epoch(
         loader: DataLoader,
         epoch: int,
         acc_func: Callable,
+        logger: Callable,
         device: str or torch.device,
         model_inferer=None,
         post_label=None,
@@ -85,12 +88,12 @@ def val_epoch(
             val_acc = np.mean([np.nanmean(l) for l in acc_list])
             avg_acc += val_acc / len(loader)
 
-            print(
-                "Val {} {}/{}".format(epoch, idx, len(loader)),
-                "acc",
-                val_acc,
-            )
-    return avg_acc
+        logger("val/acc", avg_acc)
+        print(
+            "validation {}".format(epoch),
+            "acc/val",
+            avg_acc,
+        )
 
 
 def save_checkpoint(
@@ -117,13 +120,13 @@ def save_checkpoint(
 
 
 def run_training(
+        config: dict,
         model: nn.Module,
         train_loader: DataLoader,
         val_loader: DataLoader,
         optimizer: Optimizer,
         loss_func: Callable,
         acc_func: Callable,
-        max_epochs: int,
         log_dir: str,
         device: str or torch.device,
         val_every: int,
@@ -134,11 +137,12 @@ def run_training(
         post_label=None,
         post_pred=None,
 ):
-    writer = SummaryWriter(log_dir=log_dir)
-
-    val_acc_max = 0.0
-
-    for epoch in range(start_epoch, max_epochs):
+    logger = WandBLogger(
+        config=config,
+        model=model,
+    )
+    epoch = start_epoch
+    while True:
         print("Epoch:", epoch)
         train_loss = train_epoch(
             model,
@@ -147,6 +151,7 @@ def run_training(
             epoch=epoch,
             loss_func=loss_func,
             device=device,
+            logger=logger,
         )
 
         print(
@@ -154,25 +159,18 @@ def run_training(
             "loss: {:.4f}".format(train_loss),
         )
 
-        writer.add_scalar("loss/train", train_loss, epoch)
-
         if (epoch + 1) % val_every == 0:
-            val_avg_acc = val_epoch(
+            val_epoch(
                 model,
                 val_loader,
                 epoch=epoch,
                 acc_func=acc_func,
                 device=device,
+                logger=logger,
                 model_inferer=model_inferer,
                 post_label=post_label,
                 post_pred=post_pred,
             )
-            print(
-                "validation {}".format(epoch),
-                "acc/val",
-                val_avg_acc,
-            )
-            writer.add_scalar("acc/val", val_avg_acc, epoch)
 
         if (epoch + 1) % save_every == 0:
             save_checkpoint(
@@ -182,4 +180,4 @@ def run_training(
         if scheduler is not None:
             scheduler.step()
 
-    return val_acc_max
+        epoch += 1

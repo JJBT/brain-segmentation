@@ -262,4 +262,4 @@ cython_debug/
 .idea/
 
 logs/
-
+wandb/

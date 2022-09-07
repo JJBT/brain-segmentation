@@ -1,6 +1,7 @@
 run_name: unetr_roi_32
 batch_size: 40
-optim_lr: 1e-5
+optim_lr: 1e-4
+device: cuda:0
 
 log_dir: 'logs'
 val_every: 5
@@ -25,13 +26,13 @@ infer_overlap: 0.5
 optim_name: adamw
 optim_weight_decay: 1e-5
 momentum: 0.99
-lrschedule_name: warmup_cosine
+lrschedule_name: warmup_linear
 warmup_epochs: 10
 max_epochs: 100000
 data_dir: /home/vladimir/dev/data/msd/
 #data_dir: /home/vladimir/dev/data/msd_/
 json_name: dataset.json
-spacing: [1.5, 1.5, 2.0]
+spacing: [1., 1., 1.]
 a_min: 175.
 a_max: 250.
 b_min: 0.

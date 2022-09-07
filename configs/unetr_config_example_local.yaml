@@ -1,9 +1,11 @@
 run_name: test_run
 batch_size: 1
-
+device: cuda:0
 
 log_dir: 'logs'
-inf_size: [4, 4, 4]
+val_every: 5
+save_every: 20
+inf_size: [16, 16, 16]
 in_channels: 1
 out_channels: 14
 feature_size: 16
@@ -24,7 +26,7 @@ optim_name: adamw
 optim_lr: 1e-4
 optim_weight_decay: 1e-5
 momentum: 0.99
-lrschedule_name: warmup_cosine
+lrschedule_name: warmup_linear
 warmup_epochs: 50
 max_epochs: 100000
 data_dir: /home/vladimir/dev/data/msd/

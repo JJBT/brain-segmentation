@@ -7,7 +7,9 @@ from typing import List, Tuple, Optional, Sequence
 from omegaconf import OmegaConf
 import torch
 import torch.nn.parallel
-import torch.utils.data.distributed
+from torch.optim.lr_scheduler import LinearLR
+from dotenv import load_dotenv
+
 from models.unetr import UNETR
 from trainer import run_training
 from utils.data_utils import get_loader
@@ -21,6 +23,7 @@ from monai.utils.enums import MetricReduction
 
 
 def main(config: dict):
+    load_dotenv()
     run_name = config['run_name']
     log_dir = os.path.join(config['log_dir'], run_name)
     config['log_dir'] = log_dir
@@ -32,7 +35,7 @@ def main(config: dict):
 
     shutil.copy2(config['config_path'], log_dir)
     config = parse_congig(config)
-    run(**config)
+    run(config=config, **config)
 
 
 def parse_congig(config: dict):
@@ -81,9 +84,11 @@ def run(
         RandShiftIntensityd_prob: float,
         n_workers: int,
         cache_num: int,
+        device: str,
+        config: dict,
         **kwargs,
 ):
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device(device if torch.cuda.is_available() else 'cpu')
     print(f'device: {device.type}')
 
     loader = get_loader(
@@ -176,14 +181,14 @@ def run(
         scheduler = LinearWarmupCosineAnnealingLR(
             optimizer, warmup_epochs=warmup_epochs, max_epochs=max_epochs
         )
+    elif lrschedule_name == "warmup_linear":
+        scheduler = LinearLR(optimizer, start_factor=1e-12, end_factor=1.0, total_iters=warmup_epochs)
     elif lrschedule_name == "cosine_anneal":
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_epochs)
-        if checkpoint is not None:
-            scheduler.step(epoch=start_epoch)
     else:
         scheduler = None
 
-    accuracy = run_training(
+    run_training(
         log_dir=log_dir,
         model=model,
         train_loader=loader[0],
@@ -191,17 +196,16 @@ def run(
         optimizer=optimizer,
         loss_func=dice_loss,
         acc_func=dice_acc,
-        max_epochs=max_epochs,
         val_every=val_every,
         save_every=save_every,
         device=device,
+        config=config,
         model_inferer=model_inferer,
         scheduler=scheduler,
         start_epoch=start_epoch,
         post_label=post_label,
         post_pred=post_pred,
     )
-    return accuracy
 
 
 if __name__ == "__main__":
