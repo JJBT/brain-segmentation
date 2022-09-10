@@ -201,7 +201,7 @@ def get_loader(
         # val_ds = Subset(val_ds, indices=range(0, len(val_ds), 40))
         val_loader = data.DataLoader(
             val_ds,
-            batch_size=batch_size,
+            batch_size=1,
             shuffle=False,
             num_workers=n_workers,
             pin_memory=True,
