@@ -206,6 +206,7 @@ def get_loader(
             num_workers=n_workers,
             pin_memory=True,
             persistent_workers=True,
+            drop_last=True,
         )
         loader = [train_loader, val_loader]
 
