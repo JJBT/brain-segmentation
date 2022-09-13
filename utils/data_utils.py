@@ -13,13 +13,14 @@ def get_msd_vanilla_transforms(
         a_max: float,
         b_min: float,
         b_max: float,
-        modality: int = 0
+        modality: int or Sequence = 0,
 ):
+    modality = [modality] if isinstance(modality, int) else modality    # modality = 0
     train_transforms_list = [
         transforms.LoadImaged(keys=["image", "label"]),
         transforms.AsChannelFirstd(keys=["image"]),
         transforms.Lambdad(keys=["image"], func=lambda x: x[modality]),
-        transforms.AddChanneld(keys=["image", "label"]),
+        transforms.AddChanneld(keys=["label"]),
         transforms.Spacingd(
             keys=["image", "label"], pixdim=spacing, mode=("bilinear", "nearest")
         ),
@@ -42,7 +43,7 @@ def get_msd_vanilla_transforms(
         transforms.LoadImaged(keys=["image", "label"]),
         transforms.AsChannelFirstd(keys=["image"]),
         transforms.Lambdad(keys=["image"], func=lambda x: x[modality]),
-        transforms.AddChanneld(keys=["image", "label"]),
+        transforms.AddChanneld(keys=["label"]),
         transforms.Spacingd(
             keys=["image", "label"], pixdim=spacing, mode=("bilinear", "nearest")
         ),
@@ -124,6 +125,7 @@ def get_loader(
         batch_size: int,
         test_mode: bool,
         spacing: Sequence[float],
+        modality: int or Sequence,
         a_min: float,
         a_max: float,
         b_min: float,
@@ -143,6 +145,7 @@ def get_loader(
     train_transform, val_transform = get_msd_vanilla_transforms(
         roi_size=roi_size,
         spacing=spacing,
+        modality=modality,
         a_min=a_min,
         a_max=a_max,
         b_min=b_min,
