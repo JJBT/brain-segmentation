@@ -7,7 +7,7 @@ from torch.utils.data import Subset
 
 
 def get_msd_vanilla_transforms(
-        roi_size: Sequence[int],
+        roi_size: int,
         spacing: Sequence[float],
         a_min: float,
         a_max: float,
@@ -28,7 +28,7 @@ def get_msd_vanilla_transforms(
         transforms.RandCropByPosNegLabeld(
             keys=["image", "label"],
             label_key="label",
-            spatial_size=roi_size,
+            spatial_size=(roi_size, roi_size, roi_size),
             pos=1,
             neg=1,
             num_samples=4,
@@ -128,7 +128,7 @@ def get_loader(
         a_max: float,
         b_min: float,
         b_max: float,
-        roi_size: Sequence[int],
+        roi_size: int,
         RandFlipd_prob: float,
         RandRotate90d_prob: float,
         RandScaleIntensityd_prob: float,
@@ -185,7 +185,7 @@ def get_loader(
             shuffle=True,
             num_workers=n_workers,
             pin_memory=True,
-            persistent_workers=True,
+            persistent_workers=n_workers > 0,
         )
         # val_files = load_decathlon_datalist(datalist_json, True, "validation", base_dir=data_dir)
         # val_ds = data.Dataset(data=val_files, transform=val_transform)
@@ -205,7 +205,7 @@ def get_loader(
             shuffle=False,
             num_workers=n_workers,
             pin_memory=True,
-            persistent_workers=True,
+            persistent_workers=n_workers > 0,
             drop_last=True,
         )
         loader = [train_loader, val_loader]

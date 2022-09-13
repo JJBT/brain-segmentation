@@ -28,12 +28,6 @@ def main(config: dict):
     log_dir = os.path.join(config['log_dir'], run_name)
     config['log_dir'] = log_dir
 
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
-    else:
-        raise ValueError(f'Log dir {log_dir} already exists')
-
-    shutil.copy2(config['config_path'], log_dir)
     config = parse_congig(config)
     run(config=config, **config)
 
@@ -45,7 +39,7 @@ def parse_congig(config: dict):
 def run(
         log_dir: str,
         batch_size: int,
-        inf_size: List or Tuple,
+        inf_size: int,
         in_channels: int,
         out_channels: int,
         feature_size: int,
@@ -114,7 +108,7 @@ def run(
     model = UNETR(
         in_channels=in_channels,
         out_channels=out_channels,
-        img_size=inf_size,
+        img_size=(inf_size, inf_size, inf_size),
         feature_size=feature_size,
         hidden_size=hidden_size,
         mlp_dim=mlp_dim,
@@ -139,7 +133,7 @@ def run(
     dice_acc = DiceMetric(include_background=True, reduction=MetricReduction.MEAN, get_not_nans=True)
     model_inferer = partial(
         sliding_window_inference,
-        roi_size=inf_size,
+        roi_size=(inf_size, inf_size, inf_size),
         sw_batch_size=sw_batch_size,
         predictor=model,
         overlap=infer_overlap,

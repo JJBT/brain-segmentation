@@ -193,19 +193,22 @@ class UNETR(nn.Module):
             self.vit.norm.bias.copy_(weights["state_dict"]["module.transformer.norm.bias"])
 
     def forward(self, x_in):
-        x, hidden_states_out = self.vit(x_in)
-        enc1 = self.encoder1(x_in)
+        x, hidden_states_out = self.vit(x_in)  # [feat_size ** 3, hidden_size]
+        enc1 = self.encoder1(x_in)  # img_size
         x2 = hidden_states_out[3]
-        enc2 = self.encoder2(self.proj_feat(x2, self.hidden_size, self.feat_size))
+        x_proj2 = self.proj_feat(x2, self.hidden_size, self.feat_size)  # feat_size
+        enc2 = self.encoder2(x_proj2)  # feat_size * 8
         x3 = hidden_states_out[6]
-        enc3 = self.encoder3(self.proj_feat(x3, self.hidden_size, self.feat_size))
+        x_proj3 = self.proj_feat(x3, self.hidden_size, self.feat_size)  # feat_size
+        enc3 = self.encoder3(x_proj3)  # feat_size * 4
         x4 = hidden_states_out[9]
-        enc4 = self.encoder4(self.proj_feat(x4, self.hidden_size, self.feat_size))
-        dec4 = self.proj_feat(x, self.hidden_size, self.feat_size)
-        dec3 = self.decoder5(dec4, enc4)
-        dec2 = self.decoder4(dec3, enc3)
-        dec1 = self.decoder3(dec2, enc2)
-        out = self.decoder2(dec1, enc1)
+        x_proj4 = self.proj_feat(x4, self.hidden_size, self.feat_size)  # feat_size
+        enc4 = self.encoder4(x_proj4)  # feat_size * 2
+        dec4 = self.proj_feat(x, self.hidden_size, self.feat_size)  # feat_size
+        dec3 = self.decoder5(dec4, enc4)  # feat_size * 2
+        dec2 = self.decoder4(dec3, enc3)  # feat_size * 4
+        dec1 = self.decoder3(dec2, enc2)  # feat_size * 8
+        out = self.decoder2(dec1, enc1)  # feat_size * 16
         logits = self.out(out)
         return logits
 

@@ -1,4 +1,5 @@
 import os
+import shutil
 
 import wandb
 from torch import nn
@@ -18,6 +19,16 @@ class WandBLogger:
             config=self.config,
             resume='allow',
         )
+
+        log_dir = os.path.split(self.config['log_dir'])[0]
+        if not wandb.run.offline:
+            if not os.path.exists(log_dir):
+                os.makedirs(log_dir)
+            else:
+                raise ValueError(f'Log dir {log_dir} already exists')
+
+            shutil.copy2(config['config_path'], log_dir)
+
         wandb.watch(model, log='all', log_freq=100, log_graph=True)
         self.save_config()
 
