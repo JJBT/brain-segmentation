@@ -24,15 +24,12 @@ from monai.utils.enums import MetricReduction
 
 def main(config: dict):
     load_dotenv()
-    run_name = config['run_name']
-    log_dir = os.path.join(config['log_dir'], run_name)
-    config['log_dir'] = log_dir
-
     config = parse_congig(config)
     run(config=config, **config)
 
 
 def parse_congig(config: dict):
+    config['data_dir'] = os.path.expanduser(config['data_dir'])
     return config
 
 

@@ -20,7 +20,7 @@ class WandBLogger:
             resume='allow',
         )
 
-        log_dir = os.path.split(self.config['log_dir'])[0]
+        log_dir = self.config['log_dir']
         if not wandb.run.offline:
             if not os.path.exists(log_dir):
                 os.makedirs(log_dir)
