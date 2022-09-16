@@ -7,8 +7,7 @@ def zero_grad(model: nn.Module):
         param.grad = None
 
 
-
-def dice(x, y):
+def dice(x: np.ndarray, y: np.ndarray) -> float:
     intersect = np.sum(np.sum(np.sum(x * y)))
     y_sum = np.sum(np.sum(np.sum(y)))
     if y_sum == 0:

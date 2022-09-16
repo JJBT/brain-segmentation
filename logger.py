@@ -1,6 +1,9 @@
 import os
 import shutil
 
+import numpy as np
+import torch
+
 import wandb
 from torch import nn
 from omegaconf import OmegaConf
@@ -33,13 +36,17 @@ class WandBLogger:
         self.save_config()
 
     def __call__(self, metric_name: str, value: float):
-        self.log(metric_name, value)
+        self.log({metric_name: value})
 
-    def log(self, metric_name: str, value: float):
-        self.run.log({metric_name: value})
+    def log(self, metric: dict):
+        self.run.log(metric)
 
-    def log_image(self):
-        pass
+    def log_val_dice(self, val_metric: torch.Tensor):
+        for i, val in enumerate(val_metric.cpu().numpy()):
+            self.log({f'val/acc/class_{i}': val.item()})
+
+    def log_image(self, image: np.ndarray, tag: str):
+        self.run.log({tag: wandb.Image(image)})
 
     def save_config(self):
         config_name = 'train_config.yaml'
