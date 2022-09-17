@@ -11,6 +11,7 @@ from torch.optim import Optimizer
 
 from monai.data import decollate_batch
 
+import visualize
 from utils import utils
 from logger import WandBLogger
 
@@ -21,14 +22,14 @@ def train_epoch(
         optimizer: Optimizer,
         epoch: int,
         loss_func: Callable,
-        logger: Callable,
+        logger: WandBLogger,
         device: str or torch.device,
 ) -> float or torch.Tensor:
     model.train()
     epoch_loss = 0.
 
     for idx, batch_data in enumerate(loader):
-        data, target = batch_data["image"].to(device), batch_data["label"].to(device)
+        data, target = batch_data["image"], batch_data["label"]
 
         utils.zero_grad(model)
 
@@ -55,7 +56,7 @@ def val_epoch(
         loader: DataLoader,
         epoch: int,
         acc_func: Callable,
-        logger: Callable,
+        logger: WandBLogger,
         device: str or torch.device,
         model_inferer=None,
         post_label=None,
@@ -67,8 +68,9 @@ def val_epoch(
     model.eval()
     with torch.no_grad():
         avg_acc = 0.
+        images = []
         for idx, batch_data in enumerate(loader):
-            data, target = batch_data["image"].to(device), batch_data["label"].to(device)
+            data, target = batch_data["image"], batch_data["label"]
             logits = model_inferer(data)
 
             if not logits.is_cuda:
@@ -88,7 +90,17 @@ def val_epoch(
             val_acc = np.mean([np.nanmean(l) for l in acc_list])
             avg_acc += val_acc / len(loader)
 
+            if idx < 5:
+                image = visualize.create_image_visual(
+                    source=data.cpu().numpy()[0, 0],
+                    target=target.cpu().numpy().squeeze(),
+                    output=logits.cpu().numpy().argmax(1).squeeze(),
+                )
+                images.append(image)
+
         logger("val/acc", avg_acc)
+        logger.log_val_dice(acc_func.aggregate()[0].mean(0))
+        logger.log_image(np.vstack(images), "val")
         print(
             "validation {}".format(epoch),
             "acc/val",

@@ -63,7 +63,6 @@ def run(
         val_every: int,
         save_every: int,
         data_dir: str,
-        json_name: str,
         spacing: Sequence[float],
         modality: int or Sequence,
         a_min: float,
@@ -85,9 +84,7 @@ def run(
 
     loader = get_loader(
         data_dir=data_dir,
-        json_name=json_name,
         batch_size=batch_size,
-        test_mode=False,
         spacing=spacing,
         modality=modality,
         a_min=a_min,
@@ -101,6 +98,7 @@ def run(
         RandShiftIntensityd_prob=RandShiftIntensityd_prob,
         n_workers=n_workers,
         cache_num=cache_num,
+        device=device,
     )
     print(f"Batch size is: {batch_size}")
 
@@ -129,7 +127,7 @@ def run(
     )
     post_label = AsDiscrete(to_onehot=True, n_classes=out_channels)
     post_pred = AsDiscrete(argmax=True, to_onehot=True, n_classes=out_channels)
-    dice_acc = DiceMetric(include_background=True, reduction=MetricReduction.MEAN, get_not_nans=True)
+    dice_acc = DiceMetric(include_background=True, reduction=MetricReduction.NONE, get_not_nans=True)
     model_inferer = partial(
         sliding_window_inference,
         roi_size=(inf_size, inf_size, inf_size),
