@@ -1,6 +1,7 @@
 import os
 from typing import Sequence
 
+import torch
 from monai import data, transforms, apps
 from torch.utils.data import Subset
 
@@ -13,6 +14,7 @@ def get_msd_vanilla_transforms(
         RandRotate90d_prob: float = 0.2,
         RandScaleIntensityd_prob: float = 0.1,
         RandShiftIntensityd_prob: float = 0.1,
+        device: torch.device = torch.device('cpu'),
         **kwargs,
 ):
     modality = [modality] if isinstance(modality, int) else modality    # modality = 0
@@ -26,16 +28,31 @@ def get_msd_vanilla_transforms(
         ),
         transforms.ScaleIntensityd(keys=["image"]),
         transforms.CropForegroundd(keys=["image", "label"], source_key="image"),
-        transforms.RandSpatialCropd(keys=["image", "label"],
-                                    roi_size=(roi_size, roi_size, roi_size), random_size=False),
-        transforms.Resized(keys=["image", "label"], spatial_size=(roi_size, roi_size, roi_size)),
+        transforms.FgBgToIndicesd(
+            keys="label",
+            fg_postfix="_fg",
+            bg_postfix="_bg",
+            image_key="image",
+        ),
+        transforms.EnsureTyped(keys=["image", "label"], device=device, track_meta=False),
+        transforms.RandCropByPosNegLabeld(
+            keys=["image", "label"],
+            label_key="label",
+            spatial_size=(roi_size, roi_size, roi_size),
+            pos=1,
+            neg=1,
+            num_samples=4,
+            image_key="image",
+            image_threshold=0,
+            fg_indices_key='label_fg',
+            bg_indices_key='label_bg',
+        ),
         transforms.RandFlipd(keys=["image", "label"], prob=RandFlipd_prob, spatial_axis=0),
         transforms.RandFlipd(keys=["image", "label"], prob=RandFlipd_prob, spatial_axis=1),
         transforms.RandFlipd(keys=["image", "label"], prob=RandFlipd_prob, spatial_axis=2),
         transforms.RandRotate90d(keys=["image", "label"], prob=RandRotate90d_prob, max_k=3),
         transforms.RandScaleIntensityd(keys="image", factors=0.1, prob=RandScaleIntensityd_prob),
         transforms.RandShiftIntensityd(keys="image", offsets=0.1, prob=RandShiftIntensityd_prob),
-        transforms.ToTensord(keys=["image", "label"]),
     ]
 
     val_transforms_list = [
@@ -48,7 +65,7 @@ def get_msd_vanilla_transforms(
         ),
         transforms.ScaleIntensityd(keys=["image"]),
         transforms.CropForegroundd(keys=["image", "label"], source_key="image"),
-        transforms.ToTensord(keys=["image", "label"]),
+        transforms.EnsureTyped(keys=["image", "label"], device=device, track_meta=False)
     ]
 
     train_transform = transforms.Compose(train_transforms_list)
@@ -72,6 +89,7 @@ def get_loader(
         RandShiftIntensityd_prob: float,
         n_workers: int,
         cache_num: int,
+        device: torch.device,
         **kwargs,
 ):
     train_transform, val_transform = get_msd_vanilla_transforms(
@@ -86,6 +104,7 @@ def get_loader(
         a_max=a_max,
         b_min=b_min,
         b_max=b_max,
+        device=device,
     )
 
     train_ds = apps.DecathlonDataset(
@@ -98,7 +117,7 @@ def get_loader(
     )
     # train_ds = Subset(train_ds, indices=range(0, len(train_ds), 100))
 
-    train_loader = data.DataLoader(
+    train_loader = data.ThreadDataLoader(
         train_ds,
         batch_size=batch_size,
         shuffle=True,
@@ -116,7 +135,7 @@ def get_loader(
         cache_num=cache_num,
     )
     # val_ds = Subset(val_ds, indices=range(0, len(val_ds), 20))
-    val_loader = data.DataLoader(
+    val_loader = data.ThreadDataLoader(
         val_ds,
         batch_size=1,
         shuffle=False,

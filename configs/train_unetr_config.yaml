@@ -1,4 +1,4 @@
-run_name: unetr_inf64_modal4_lr1_v3_fix_ch_tr
+run_name: baseline
 batch_size: 8
 optim_lr: 1e-4
 device: cuda:0
@@ -41,5 +41,5 @@ RandFlipd_prob: 0.2
 RandRotate90d_prob: 0.2
 RandScaleIntensityd_prob: 0.1
 RandShiftIntensityd_prob: 0.1
-n_workers: 10
-cache_num: 40
+n_workers: 0
+cache_num: 390

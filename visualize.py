@@ -19,15 +19,14 @@ def create_image_visual(
         title: str = 'image'
 ) -> np.ndarray:
     index = source.squeeze().shape[-1] // 2
-    out_size = 96
 
-    source = np.resize(source.squeeze()[..., index], (out_size, out_size))
-    target = np.resize(target.squeeze()[..., index], (out_size, out_size))
-    output = np.resize(output.squeeze()[..., index], (out_size, out_size))
+    source = source.squeeze()[..., index]
+    target = target.squeeze()[..., index]
+    output = output.squeeze()[..., index]
 
     fig = plt.figure(figsize=(8, 4))
     ax1 = fig.add_subplot(131)
-    ax1.imshow(source)
+    ax1.imshow(source, cmap='gray')
     plt.title('input')
     ax2 = fig.add_subplot(132)
     ax2.imshow(output)
@@ -35,6 +34,9 @@ def create_image_visual(
     ax3 = fig.add_subplot(133)
     ax3.imshow(target)
     plt.title('target')
+
+    plt.xticks([])
+    plt.yticks([])
 
     image = fig2data(fig)
     # plt.savefig('{}.png'.format(title))

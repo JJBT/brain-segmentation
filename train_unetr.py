@@ -98,6 +98,7 @@ def run(
         RandShiftIntensityd_prob=RandShiftIntensityd_prob,
         n_workers=n_workers,
         cache_num=cache_num,
+        device=device,
     )
     print(f"Batch size is: {batch_size}")
 
