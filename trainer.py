@@ -29,7 +29,7 @@ def train_epoch(
     epoch_loss = 0.
 
     for idx, batch_data in enumerate(loader):
-        data, target = batch_data["image"], batch_data["label"]
+        data, target = batch_data["image"].to(device), batch_data["label"].to(device)
 
         utils.zero_grad(model)
 
@@ -70,7 +70,7 @@ def val_epoch(
         avg_acc = 0.
         images = []
         for idx, batch_data in enumerate(loader):
-            data, target = batch_data["image"], batch_data["label"]
+            data, target = batch_data["image"].to(device), batch_data["label"].to(device)
             logits = model_inferer(data)
 
             if not logits.is_cuda:

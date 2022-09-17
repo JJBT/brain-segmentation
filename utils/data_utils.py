@@ -34,14 +34,14 @@ def get_msd_vanilla_transforms(
             bg_postfix="_bg",
             image_key="image",
         ),
-        transforms.EnsureTyped(keys=["image", "label"], device=device, track_meta=False),
+        transforms.EnsureTyped(keys=["image", "label"], device=torch.device('cpu'), track_meta=False),
         transforms.RandCropByPosNegLabeld(
             keys=["image", "label"],
             label_key="label",
             spatial_size=(roi_size, roi_size, roi_size),
             pos=1,
             neg=1,
-            num_samples=4,
+            num_samples=2,
             image_key="image",
             image_threshold=0,
             fg_indices_key='label_fg',
@@ -65,7 +65,7 @@ def get_msd_vanilla_transforms(
         ),
         transforms.ScaleIntensityd(keys=["image"]),
         transforms.CropForegroundd(keys=["image", "label"], source_key="image"),
-        transforms.EnsureTyped(keys=["image", "label"], device=device, track_meta=False)
+        transforms.EnsureTyped(keys=["image", "label"], device=torch.device('cpu'), track_meta=False)
     ]
 
     train_transform = transforms.Compose(train_transforms_list)
