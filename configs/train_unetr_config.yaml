@@ -1,9 +1,10 @@
 run_name: baseline
-batch_size: 8
+batch_size: 12
 optim_lr: 1e-4
 device: cuda:0
 
 log_dir: 'logs/${run_name}'
+model_name: unetr
 val_every: 20
 save_every: 40
 inf_size: 64

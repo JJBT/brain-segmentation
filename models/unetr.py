@@ -211,21 +211,3 @@ class UNETR(nn.Module):
         out = self.decoder2(dec1, enc1)  # feat_size * 16
         logits = self.out(out)
         return logits
-
-
-if __name__ == '__main__':
-    import pytorch_model_summary
-    image_size = (96, 96, 96)
-
-    model = UNETR(
-        1,
-        14,
-        image_size
-    )
-    batch = torch.randn(2, 1, *image_size)
-    print(model(batch).shape)
-
-    pytorch_model_summary.summary(model, batch, print_summary=True)
-
-    traced_model = torch.jit.trace(model, batch)
-    torch.jit.save(traced_model, 'unetr.pt')

@@ -134,11 +134,11 @@ def get_loader(
         download=False,
         cache_num=cache_num,
     )
-    # val_ds = Subset(val_ds, indices=range(0, len(val_ds), 20))
+    # val_ds = Subset(val_ds, indices=range(0, len(val_ds), 40))
     val_loader = data.ThreadDataLoader(
         val_ds,
         batch_size=1,
-        shuffle=False,
+        shuffle=True,
         num_workers=n_workers,
         pin_memory=True,
         persistent_workers=n_workers > 0,

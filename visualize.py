@@ -25,6 +25,8 @@ def create_image_visual(
     output = output.squeeze()[..., index]
 
     fig = plt.figure(figsize=(8, 4))
+    plt.xticks([])
+    plt.yticks([])
     ax1 = fig.add_subplot(131)
     ax1.imshow(source, cmap='gray')
     plt.title('input')
@@ -34,9 +36,6 @@ def create_image_visual(
     ax3 = fig.add_subplot(133)
     ax3.imshow(target)
     plt.title('target')
-
-    plt.xticks([])
-    plt.yticks([])
 
     image = fig2data(fig)
     # plt.savefig('{}.png'.format(title))
