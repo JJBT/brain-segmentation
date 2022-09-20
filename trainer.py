@@ -117,10 +117,6 @@ def save_checkpoint(
 ):
     state_dict = model.state_dict()
     save_dict = {"epoch": epoch, "state_dict": state_dict}
-    if optimizer is not None:
-        save_dict["optimizer"] = optimizer.state_dict()
-    if scheduler is not None:
-        save_dict["scheduler"] = scheduler.state_dict()
 
     snapshot_path = os.path.join(log_dir, 'snapshots')
     if not os.path.exists(snapshot_path):

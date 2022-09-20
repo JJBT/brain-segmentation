@@ -262,5 +262,6 @@ cython_debug/
 .idea/
 
 logs/
+logs_storage/
 wandb/
 .DS_Store

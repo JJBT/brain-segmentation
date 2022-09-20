@@ -2,6 +2,7 @@ from typing import Optional
 
 import torch
 from monai.networks.nets import UNet, BasicUNet
+from models.vit_autoenc import ViTAutoEnc
 
 from models.unetr import UNETR
 
@@ -41,10 +42,25 @@ def get_model(
         )
     elif model_name == 'basic_unet':
         model = BasicUNet(
-            dimensions=3,
-            in_channels=4,
-            out_channels=4,
+            spatial_dims=3,
+            in_channels=in_channels,
+            out_channels=out_channels,
             features=(16, 32, 64, 128, 128, 32),
+        )
+    elif model_name == 'vit':
+        model = ViTAutoEnc(
+            in_channels=in_channels,
+            img_size=(inf_size, inf_size, inf_size),
+            patch_size=(16, 16, 16),
+            out_channels=out_channels,
+            deconv_chns=16,
+            hidden_size=hidden_size,
+            mlp_dim=mlp_dim,
+            num_layers=12,
+            num_heads=num_heads,
+            pos_embed=pos_embed,
+            dropout_rate=dropout_rate,
+            spatial_dims=3,
         )
     else:
         raise NotImplementedError(f'Model {model_name} is not implemented')
