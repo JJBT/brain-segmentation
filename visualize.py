@@ -1,7 +1,9 @@
-from typing import List
+from typing import List, Optional
 
 import numpy as np
 import torch
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 
 
@@ -14,26 +16,34 @@ def fig2data(fig):
 
 def create_image_visual(
         source: np.ndarray,
-        target: np.ndarray,
-        output: np.ndarray,
+        target: Optional[np.ndarray] = None,
+        output: Optional[np.ndarray] = None,
         title: str = 'image'
 ) -> np.ndarray:
     index = source.squeeze().shape[-1] // 2
 
     source = source.squeeze()[..., index]
-    target = target.squeeze()[..., index]
-    output = output.squeeze()[..., index]
+
+    if target is not None:
+        target = target.squeeze()[..., index]
+
+    if output is not None:
+        output = output.squeeze()[..., index]
 
     fig = plt.figure(figsize=(8, 4))
     ax1 = fig.add_subplot(131)
     ax1.imshow(source, cmap='gray')
     plt.title('input')
-    ax2 = fig.add_subplot(132)
-    ax2.imshow(output)
-    plt.title('prediction')
-    ax3 = fig.add_subplot(133)
-    ax3.imshow(target)
-    plt.title('target')
+
+    if output is not None:
+        ax2 = fig.add_subplot(132)
+        ax2.imshow(output)
+        plt.title('prediction')
+
+    if target is not None:
+        ax3 = fig.add_subplot(133)
+        ax3.imshow(target)
+        plt.title('target')
 
     image = fig2data(fig)
     # plt.savefig('{}.png'.format(title))

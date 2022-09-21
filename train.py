@@ -22,14 +22,22 @@ from monai.transforms import AsDiscrete
 from monai.utils.enums import MetricReduction
 
 
-def main(config: dict):
+def main(config: dict, debug: bool = False):
     load_dotenv()
-    config = parse_congig(config)
-    run(config=config, **config)
+    config = parse_congig(config, debug)
+    run(config=config, debug=debug, **config)
 
 
-def parse_congig(config: dict):
+def parse_congig(config: dict, debug: bool = False) -> dict:
     config['data_dir'] = os.path.expanduser(config['data_dir'])
+    if debug:
+        print('Using debug mode!!!')
+
+        config['batch_size'] = 2
+        config['num_workers'] = 0
+        config['val_every'] = 1
+        config['cache_num'] = 2
+
     return config
 
 
@@ -74,10 +82,13 @@ def run(
         RandRotate90d_prob: float,
         RandScaleIntensityd_prob: float,
         RandShiftIntensityd_prob: float,
+        gauss_noise_prob: float,
+        gauss_noise_std: float,
         n_workers: int,
         cache_num: int,
         device: str,
         config: dict,
+        debug: bool,
         **kwargs,
 ):
     device = torch.device(device if torch.cuda.is_available() else 'cpu')
@@ -97,9 +108,12 @@ def run(
         RandRotate90d_prob=RandRotate90d_prob,
         RandScaleIntensityd_prob=RandScaleIntensityd_prob,
         RandShiftIntensityd_prob=RandShiftIntensityd_prob,
+        gauss_noise_prob=gauss_noise_prob,
+        gauss_noise_std=gauss_noise_std,
         n_workers=n_workers,
         cache_num=cache_num,
         device=device,
+        debug=debug,
     )
     print(f"Batch size is: {batch_size}")
 
@@ -180,6 +194,7 @@ def run(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, default="train_unetr_config.yaml")
+    parser.add_argument("--debug", type=bool, default=False)
     args = parser.parse_args()
     config_name = args.config
 
@@ -191,4 +206,4 @@ if __name__ == "__main__":
     cfg = OmegaConf.load(config_path)
     cfg = OmegaConf.to_container(cfg, resolve=True)
     cfg["config_path"] = config_path
-    main(cfg)
+    main(cfg, debug=args.debug)

@@ -1,4 +1,4 @@
-run_name: unet_gauss_0_05
+run_name: baseline_unet
 batch_size: 12
 optim_lr: 1e-4
 device: cuda:0
@@ -42,7 +42,5 @@ RandFlipd_prob: 0.2
 RandRotate90d_prob: 0.2
 RandScaleIntensityd_prob: 0.1
 RandShiftIntensityd_prob: 0.1
-gauss_noise_prob: 1.
-gauss_noise_std: 0.05
 n_workers: 0
 cache_num: 390

@@ -99,13 +99,15 @@ def val_epoch(
                 images.append(image)
 
         logger("val/acc", avg_acc)
-        logger.log_val_dice(acc_func.aggregate()[0].mean(0))
+        acc_by_class = acc_func.aggregate()[0].mean(0)
+        logger.log_val_dice(acc_by_class)
         logger.log_image(np.vstack(images), "val")
         print(
             "validation {}".format(epoch),
             "acc/val",
             avg_acc,
         )
+        print(acc_by_class)
 
 
 def save_checkpoint(

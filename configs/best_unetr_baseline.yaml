@@ -1,4 +1,4 @@
-run_name: unetr_inf64_modal4_lr1_v3_fix_ch
+run_name: baseline_unetr
 batch_size: 2 # 4
 optim_lr: 1e-4
 device: cuda:0
