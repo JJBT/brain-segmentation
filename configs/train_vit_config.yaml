@@ -42,7 +42,9 @@ RandFlipd_prob: 0.2
 RandRotate90d_prob: 0.2
 RandScaleIntensityd_prob: 0.1
 RandShiftIntensityd_prob: 0.1
-gauss_noise_prob: 1.
+gauss_noise_prob: 0.
 gauss_noise_std: 0.05
+gauss_smooth_prob: 1.
+gauss_smooth_std: [0.25, 1.5]
 n_workers: 0
 cache_num: 390

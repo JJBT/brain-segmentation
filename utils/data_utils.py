@@ -1,5 +1,5 @@
 import os
-from typing import Sequence
+from typing import Sequence, Tuple
 
 import torch
 from monai import data, transforms, apps
@@ -16,6 +16,8 @@ def get_msd_vanilla_transforms(
         RandShiftIntensityd_prob: float = 0.1,
         gauss_noise_prob: float = 0.0,
         gauss_noise_std: float = 0.1,
+        gauss_smooth_prob: float = 0.0,
+        gauss_smooth_std: float or Tuple[float] = (0.25, 1.5),
         device: torch.device = torch.device('cpu'),
         **kwargs,
 ):
@@ -49,7 +51,11 @@ def get_msd_vanilla_transforms(
             fg_indices_key='label_fg',
             bg_indices_key='label_bg',
         ),
+
         transforms.RandGaussianNoised(keys=["image"], prob=gauss_noise_prob, std=gauss_noise_std),
+        transforms.RandGaussianSmoothd(keys=["image"], prob=gauss_smooth_prob,
+                                       sigma_x=gauss_smooth_std, sigma_y=gauss_smooth_std, sigma_z=gauss_smooth_std),
+
         transforms.RandFlipd(keys=["image", "label"], prob=RandFlipd_prob, spatial_axis=0),
         transforms.RandFlipd(keys=["image", "label"], prob=RandFlipd_prob, spatial_axis=1),
         transforms.RandFlipd(keys=["image", "label"], prob=RandFlipd_prob, spatial_axis=2),
@@ -69,6 +75,9 @@ def get_msd_vanilla_transforms(
         transforms.ScaleIntensityd(keys=["image"]),
         transforms.CropForegroundd(keys=["image", "label"], source_key="image"),
         transforms.RandGaussianNoised(keys=["image"], prob=gauss_noise_prob, std=gauss_noise_std),
+        transforms.RandGaussianSmoothd(keys=["image"], prob=gauss_smooth_prob,
+                                       sigma_x=gauss_smooth_std, sigma_y=gauss_smooth_std, sigma_z=gauss_smooth_std),
+
         transforms.EnsureTyped(keys=["image", "label"], device=torch.device('cpu'), track_meta=False)
     ]
 
@@ -93,6 +102,8 @@ def get_loader(
         RandShiftIntensityd_prob: float,
         gauss_noise_prob: float,
         gauss_noise_std: float,
+        gauss_smooth_prob: float,
+        gauss_smooth_std: float or Tuple[float],
         n_workers: int,
         cache_num: int,
         device: torch.device,
@@ -109,6 +120,8 @@ def get_loader(
         RandShiftIntensityd_prob=RandShiftIntensityd_prob,
         gauss_noise_prob=gauss_noise_prob,
         gauss_noise_std=gauss_noise_std,
+        gauss_smooth_prob=gauss_smooth_prob,
+        gauss_smooth_std=gauss_smooth_std,
         a_min=a_min,
         a_max=a_max,
         b_min=b_min,
