@@ -18,7 +18,7 @@ def create_image_visual(
         source: np.ndarray,
         target: Optional[np.ndarray] = None,
         output: Optional[np.ndarray] = None,
-        title: str = 'image'
+        title: str = ''
 ) -> np.ndarray:
     index = source.squeeze().shape[-1] // 2
 
@@ -44,6 +44,9 @@ def create_image_visual(
         ax3 = fig.add_subplot(133)
         ax3.imshow(target)
         plt.title('target')
+
+    if title:
+        plt.suptitle(title)
 
     image = fig2data(fig)
     # plt.savefig('{}.png'.format(title))
