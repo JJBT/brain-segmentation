@@ -23,8 +23,9 @@ class ImageSaver:
         self.save_dir = save_dir
         self.save_name = save_name
         self.path_to_save = os.path.join(save_dir, save_name)
-        if not os.path.exists(self.path_to_save):
-            os.makedirs(self.path_to_save)
+        self.path_to_save_images = os.path.join(self.path_to_save, 'images')
+        if not os.path.exists(self.path_to_save_images):
+            os.makedirs(self.path_to_save_images)
         else:
             raise ValueError(f'ImageSaver: {self.path_to_save} already exists')
 
@@ -32,7 +33,7 @@ class ImageSaver:
         assert len(image.shape) == 3
         name = str(name)
 
-        cv2.imwrite(os.path.join(self.path_to_save, name + '.png'), image)
+        cv2.imwrite(os.path.join(self.path_to_save_images, name + '.png'), image)
 
     def save_results(self, **kwargs):
         with open(os.path.join(self.path_to_save, 'results.txt'), 'w') as f:
