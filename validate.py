@@ -96,6 +96,7 @@ def main(model_config: dict, data_config: dict, title: str = ''):
 
             print(f"Class Dice: {dice_score_sample}")
 
+        dice_scores = np.array(dice_scores)
         overall_dice_by_class = np.mean(dice_scores, axis=0).round(3)
         overall_dice = np.mean(dice_scores[:, 1:]).round(3)
         print(f"Overall Mean Dice By Class: {overall_dice_by_class}")
