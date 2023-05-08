@@ -16,12 +16,12 @@ This project focuses on evaluating the impact of low and high frequency distorti
 
 ```bash
 # clone project
-git clone https://github.com/JJBT/transformer_segmentation_model.git
-cd transformer_segmentation_model
+git clone https://github.com/JJBT/brain-segmentation.git
+cd brain-segmentation
 
 # [OPTIONAL] create conda environment
-conda create -n transformer_segmentation
-conda activate transformer_segmentation
+conda create -n brain-segmentation
+conda activate brain-segmentation
 
 # install requirements
 pip install -r requirements.txt
